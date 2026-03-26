@@ -1,0 +1,80 @@
+@startuml
+
+entity "Owners - Владельцы" as Owners {
+  * id: SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * name varchar(100) : имя владельца
+}
+
+entity "Places - Места возникновения затрат" as Places {
+  * id: SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * owner_id int : владелец Места возникновения затрат
+  * name varchar(100) : наименование (квартира, дача, мобильная связь, etc)
+  address varchar(100) : адрес
+}
+
+entity "Services - Оплачиваемые услуги" as Services {
+  * id SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * place_id int : Место возникновения затрат
+  * name varchar(100) : за что производится оплата
+}
+
+entity "Payments - Факты оплаты" as Payments {
+  * payment_id SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * service_id int : за что производится оплата
+  amount numeric(10, 2) : сумма оплаты
+  pay_date date : дата оплаты
+  service_start_date date : дата начала периода предоставления услуг
+  service_finish_date date : дата начала периода предоставления услуг
+  cmt : Комментарий
+}
+
+entity "Meters - Приборы учета (счётчики)" as Meters {
+  * id SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * place_id int : Место возникновения затрат
+  * meterkind_id int : тип счётчика (ГВС, ХВС, Электричество)
+  * name varchar(100) : номер счётчика
+}
+
+entity "MeterKinds - Виды приборов учёта" as MeterKinds {
+  * id SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * name varchar(100) : наименование типа счётчика \n(ГВС, ХВС, Электричество)
+}
+
+entity "Cutoffs - Показания" as Cutoffs {
+  * id SERIAL PRIMARY KEY
+  created_at: timestamp : временная метка создания записи
+  modified_at: timestamp : временная метка модификации записи
+  --
+  * meter_id int : счётчик, с которого снято показание
+  value numeric(18, 6) : показание счётчика
+  read_date date : дата снятия показаний
+}
+
+
+Owners ||..|{ Places : владеют местами возникновения затрат
+Places ||..|{ Services : услуги оказываются по месту возникновения затрат
+Places ||..|{ Meters : внутри места возникновения затрат \n установлены   приборы учёта
+MeterKinds ||..|{ Meters : приборы учёта \nимеют свой тип
+Services ||..|{ Payments : услуги оплачиваются
+Meters ||..|{ Cutoffs : со счётчиков \n снимаются \n показания
+
+
+@enduml
